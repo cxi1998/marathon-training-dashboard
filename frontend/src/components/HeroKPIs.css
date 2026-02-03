@@ -1,0 +1,73 @@
+.hero-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.kpi-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.kpi-label {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.kpi-change {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.kpi-change.positive {
+  color: #4caf50;
+}
+
+.kpi-change.negative {
+  color: #f44336;
+}
+
+.kpi-trend {
+  font-size: 1.2rem;
+  margin-top: 5px;
+}
+
+.kpi-trend.up {
+  color: #4caf50;
+}
+
+.kpi-trend.down {
+  color: #f44336;
+}
+
+.kpi-trend.stable {
+  color: #888;
+}
+
+.kpi-subvalue {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+@media (max-width: 768px) {
+  .hero-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .kpi-value {
+    font-size: 1.5rem;
+  }
+}

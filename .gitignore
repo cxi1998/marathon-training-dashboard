@@ -1,0 +1,13 @@
+node_modules
+dist
+.env
+*.log
+.DS_Store
+
+# Backend specific
+backend/dist
+backend/.env
+
+# Frontend specific
+frontend/dist
+frontend/.env

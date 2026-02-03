@@ -1,0 +1,33 @@
+{
+  "name": "marathon-dashboard-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Marathon Training Dashboard",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": ["marathon", "training", "strava", "oura"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.2",
+    "express-session": "^1.17.3",
+    "node-cache": "^5.1.2",
+    "crypto-js": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/express-session": "^1.17.10",
+    "@types/node": "^20.10.4",
+    "@types/crypto-js": "^4.2.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
