@@ -51,39 +51,39 @@ export function aggregateDashboardData(
   const sleepSummaries = sleepData.map((sleep): SleepSummary => ({
     id: sleep.id,
     date: sleep.day,
-    duration: sleep.total_sleep_duration / 3600,
-    deepSleep: sleep.deep_sleep_duration / 3600,
-    lightSleep: sleep.light_sleep_duration / 3600,
-    remSleep: sleep.rem_sleep_duration / 3600,
-    efficiency: sleep.efficiency,
-    sleepScore: sleep.score,
-    averageHrv: sleep.average_hrv,
+    duration: (sleep.total_sleep_duration ?? 0) / 3600,
+    deepSleep: (sleep.deep_sleep_duration ?? 0) / 3600,
+    lightSleep: (sleep.light_sleep_duration ?? 0) / 3600,
+    remSleep: (sleep.rem_sleep_duration ?? 0) / 3600,
+    efficiency: sleep.efficiency ?? 0,
+    sleepScore: sleep.score ?? 0,
+    averageHrv: sleep.average_hrv ?? 0,
   }));
 
   const readinessSummaries = readinessData.map((readiness): ReadinessSummary => ({
     id: readiness.id,
     date: readiness.day,
     readinessScore: readiness.score,
-    hrvBalance: readiness.contributors.hrv_balance,
-    sleepBalance: readiness.contributors.sleep_balance,
-    activityBalance: readiness.contributors.activity_balance,
-    restingHeartRate: readiness.contributors.resting_heart_rate,
-    temperatureDeviation: readiness.temperature_deviation,
+    hrvBalance: readiness.contributors?.hrv_balance ?? 0,
+    sleepBalance: readiness.contributors?.sleep_balance ?? 0,
+    activityBalance: readiness.contributors?.activity_balance ?? 0,
+    restingHeartRate: readiness.contributors?.resting_heart_rate ?? 0,
+    temperatureDeviation: readiness.temperature_deviation ?? 0,
   }));
 
   const totalMileage = activitySummaries.reduce((sum, act) => sum + act.distance, 0);
   const avgReadiness =
     readinessSummaries.length > 0
-      ? readinessSummaries.reduce((sum, r) => sum + r.readinessScore, 0) /
+      ? readinessSummaries.reduce((sum, r) => sum + (r.readinessScore ?? 0), 0) /
         readinessSummaries.length
       : 0;
   const avgSleepDuration =
     sleepSummaries.length > 0
-      ? sleepSummaries.reduce((sum, s) => sum + s.duration, 0) / sleepSummaries.length
+      ? sleepSummaries.reduce((sum, s) => sum + (s.duration ?? 0), 0) / sleepSummaries.length
       : 0;
   const avgSleepScore =
     sleepSummaries.length > 0
-      ? sleepSummaries.reduce((sum, s) => sum + s.sleepScore, 0) / sleepSummaries.length
+      ? sleepSummaries.reduce((sum, s) => sum + (s.sleepScore ?? 0), 0) / sleepSummaries.length
       : 0;
   const totalElevation = activitySummaries.reduce((sum, act) => sum + act.elevationGain, 0);
   const trainingLoad = activitySummaries.reduce(

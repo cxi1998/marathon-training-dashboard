@@ -25,7 +25,7 @@ function App() {
     }
   };
 
-  const checkURLParams = () => {
+  const checkURLParams = async () => {
     const params = new URLSearchParams(window.location.search);
     const stravaConnected = params.get('strava');
     const ouraConnected = params.get('oura');
@@ -33,13 +33,15 @@ function App() {
 
     if (stravaConnected === 'connected') {
       setError(null);
-      checkAuthStatus();
+      // Wait for auth status to update before clearing URL
+      await checkAuthStatus();
       window.history.replaceState({}, '', '/');
     }
 
     if (ouraConnected === 'connected') {
       setError(null);
-      checkAuthStatus();
+      // Wait for auth status to update before clearing URL
+      await checkAuthStatus();
       window.history.replaceState({}, '', '/');
     }
 
@@ -87,6 +89,7 @@ function App() {
     );
   }
 
+  const isAuthenticated = authStatus.strava || authStatus.oura;
   const isFullyAuthenticated = authStatus.strava && authStatus.oura;
 
   return (
@@ -103,10 +106,10 @@ function App() {
         </div>
       )}
 
-      {!isFullyAuthenticated ? (
+      {!isAuthenticated ? (
         <div className="auth-container">
           <h2>Connect Your Accounts</h2>
-          <p>Connect both Strava and Oura to view your training dashboard.</p>
+          <p>Connect at least one service to view your training dashboard.</p>
 
           <div className="auth-buttons">
             <button
@@ -129,11 +132,30 @@ function App() {
       ) : (
         <>
           <div className="auth-status">
-            <span>✓ Connected to Strava & Oura</span>
+            <span>
+              {isFullyAuthenticated
+                ? '✓ Connected to Strava & Oura'
+                : `✓ Connected to ${authStatus.strava ? 'Strava' : 'Oura'}`}
+            </span>
+            {!isFullyAuthenticated && (
+              <span className="partial-auth-warning">
+                {authStatus.strava ? 'Connect Oura for recovery data' : 'Connect Strava for activity data'}
+              </span>
+            )}
             <button onClick={handleLogout} className="logout-btn">
               Logout
             </button>
           </div>
+          {!isFullyAuthenticated && (
+            <div className="partial-auth-actions">
+              <button
+                onClick={authStatus.strava ? connectOura : connectStrava}
+                className="connect-remaining-btn"
+              >
+                {authStatus.strava ? 'Connect Oura' : 'Connect Strava'}
+              </button>
+            </div>
+          )}
           <Dashboard />
         </>
       )}

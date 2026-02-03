@@ -60,18 +60,18 @@ export interface OuraSleep {
   day: string;
   score: number;
   timestamp: string;
-  duration: number;
-  total_sleep_duration: number;
-  awake_time: number;
-  light_sleep_duration: number;
-  deep_sleep_duration: number;
-  rem_sleep_duration: number;
-  efficiency: number;
-  restless_periods: number;
-  average_heart_rate: number;
-  lowest_heart_rate: number;
-  average_hrv: number;
-  temperature_delta: number;
+  duration?: number | null;
+  total_sleep_duration?: number | null;
+  awake_time?: number | null;
+  light_sleep_duration?: number | null;
+  deep_sleep_duration?: number | null;
+  rem_sleep_duration?: number | null;
+  efficiency?: number | null;
+  restless_periods?: number | null;
+  average_heart_rate?: number | null;
+  lowest_heart_rate?: number | null;
+  average_hrv?: number | null;
+  temperature_delta?: number | null;
 }
 
 export interface OuraReadiness {
@@ -79,18 +79,18 @@ export interface OuraReadiness {
   day: string;
   score: number;
   timestamp: string;
-  temperature_deviation: number;
-  temperature_trend_deviation: number;
-  contributors: {
-    activity_balance: number;
-    body_temperature: number;
-    hrv_balance: number;
-    previous_day_activity: number;
-    previous_night: number;
-    recovery_index: number;
-    resting_heart_rate: number;
-    sleep_balance: number;
-  };
+  temperature_deviation?: number | null;
+  temperature_trend_deviation?: number | null;
+  contributors?: {
+    activity_balance?: number | null;
+    body_temperature?: number | null;
+    hrv_balance?: number | null;
+    previous_day_activity?: number | null;
+    previous_night?: number | null;
+    recovery_index?: number | null;
+    resting_heart_rate?: number | null;
+    sleep_balance?: number | null;
+  } | null;
 }
 
 export interface OuraHeartRate {

@@ -44,9 +44,15 @@ export default function Dashboard() {
       />
 
       {loading && <div className="loading-message">Loading data...</div>}
-      {error && <div className="error-message">{error}</div>}
 
-      {data && !loading && (
+      {error && (
+        <div className="error-message">
+          {error}
+          <button onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      )}
+
+      {data && !loading && !error && (
         <>
           <HeroKPIs kpis={data.kpis} />
           <TimeSeriesChart timeSeries={data.timeSeries} />
