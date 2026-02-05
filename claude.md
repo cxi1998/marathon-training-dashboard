@@ -1,4 +1,5 @@
 # Marathon Training Dashboard - Technical Documentation
+I am a product manager with limited coding experience who is looking to learn and become more technical. When coding and doing your work, please share tips that explain the tech architecture and any changes that you’re making and why.
 
 ## Overview
 A full-stack web application for tracking marathon training progress by integrating Strava (training data) and Oura (recovery data). Built with React/TypeScript frontend and Node.js/Express backend.

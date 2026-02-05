@@ -2,23 +2,49 @@ import { Router, Request, Response } from 'express';
 import stravaService from '../services/strava';
 import ouraService from '../services/oura';
 import { aggregateDashboardData } from '../utils/dataAggregation';
+import { TokenData } from '../types';
 
 const router = Router();
 
-function requireAuth(req: Request, res: Response, next: Function) {
-  // Allow partial auth - require at least ONE service
-  if (!req.session.stravaTokens && !req.session.ouraTokens) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-  next();
+/**
+ * Get OAuth tokens from environment variables
+ * Used for Vercel deployment where tokens are stored as env vars
+ */
+function getTokensFromEnv(): { stravaTokens: TokenData | null; ouraTokens: TokenData | null } {
+  // Diagnostic logging
+  console.log('[ENV CHECK] Environment variables status:', {
+    STRAVA_ACCESS_TOKEN: process.env.STRAVA_ACCESS_TOKEN ? `Present (${process.env.STRAVA_ACCESS_TOKEN.substring(0, 10)}...)` : 'MISSING',
+    OURA_ACCESS_TOKEN: process.env.OURA_ACCESS_TOKEN ? `Present (${process.env.OURA_ACCESS_TOKEN.substring(0, 10)}...)` : 'MISSING',
+    OURA_REFRESH_TOKEN: process.env.OURA_REFRESH_TOKEN ? 'Present' : 'MISSING',
+    OURA_TOKEN_EXPIRES_AT: process.env.OURA_TOKEN_EXPIRES_AT || 'MISSING'
+  });
+
+  const stravaTokens = process.env.STRAVA_ACCESS_TOKEN
+    ? {
+        accessToken: process.env.STRAVA_ACCESS_TOKEN,
+        refreshToken: process.env.STRAVA_REFRESH_TOKEN || '',
+        expiresAt: parseInt(process.env.STRAVA_TOKEN_EXPIRES_AT || '0') * 1000, // Convert seconds to milliseconds
+      }
+    : null;
+
+  const ouraTokens = process.env.OURA_ACCESS_TOKEN
+    ? {
+        accessToken: process.env.OURA_ACCESS_TOKEN,
+        refreshToken: process.env.OURA_REFRESH_TOKEN || '',
+        expiresAt: parseInt(process.env.OURA_TOKEN_EXPIRES_AT || '0') * 1000, // Convert seconds to milliseconds
+      }
+    : null;
+
+  return { stravaTokens, ouraTokens };
 }
 
-router.get('/data', requireAuth, async (req: Request, res: Response) => {
+router.get('/data', async (req: Request, res: Response) => {
   try {
-    console.log(`[Dashboard Data] Session ID: ${req.sessionID}`);
+    const { stravaTokens, ouraTokens } = getTokensFromEnv();
+
     console.log(`[Dashboard Data] Tokens:`, {
-      hasStrava: !!req.session.stravaTokens,
-      hasOura: !!req.session.ouraTokens
+      hasStrava: !!stravaTokens,
+      hasOura: !!ouraTokens
     });
 
     const { date, lookback } = req.query;
@@ -39,14 +65,14 @@ router.get('/data', requireAuth, async (req: Request, res: Response) => {
 
     // Use Promise.allSettled to handle partial authentication
     const [activitiesResult, sleepDataResult, readinessDataResult] = await Promise.allSettled([
-      req.session.stravaTokens
-        ? stravaService.getActivities(req.session.stravaTokens, startDate, endDate)
+      stravaTokens
+        ? stravaService.getActivities(stravaTokens, startDate, endDate)
         : Promise.resolve([]),
-      req.session.ouraTokens
-        ? ouraService.getSleepData(req.session.ouraTokens, startDate, endDate)
+      ouraTokens
+        ? ouraService.getSleepData(ouraTokens, startDate, endDate)
         : Promise.resolve([]),
-      req.session.ouraTokens
-        ? ouraService.getReadinessData(req.session.ouraTokens, startDate, endDate)
+      ouraTokens
+        ? ouraService.getReadinessData(ouraTokens, startDate, endDate)
         : Promise.resolve([])
     ]);
 
@@ -93,8 +119,10 @@ router.get('/data', requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.get('/activities', requireAuth, async (req: Request, res: Response) => {
+router.get('/activities', async (req: Request, res: Response) => {
   try {
+    const { stravaTokens } = getTokensFromEnv();
+
     const { startDate, endDate } = req.query;
 
     if (!startDate || !endDate) {
@@ -108,12 +136,12 @@ router.get('/activities', requireAuth, async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid date parameters' });
     }
 
-    if (!req.session.stravaTokens) {
+    if (!stravaTokens) {
       return res.json([]);
     }
 
     const activities = await stravaService.getActivities(
-      req.session.stravaTokens,
+      stravaTokens,
       start,
       end
     );
@@ -125,8 +153,10 @@ router.get('/activities', requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.get('/sleep', requireAuth, async (req: Request, res: Response) => {
+router.get('/sleep', async (req: Request, res: Response) => {
   try {
+    const { ouraTokens } = getTokensFromEnv();
+
     const { startDate, endDate } = req.query;
 
     if (!startDate || !endDate) {
@@ -140,11 +170,11 @@ router.get('/sleep', requireAuth, async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid date parameters' });
     }
 
-    if (!req.session.ouraTokens) {
+    if (!ouraTokens) {
       return res.json([]);
     }
 
-    const sleepData = await ouraService.getSleepData(req.session.ouraTokens, start, end);
+    const sleepData = await ouraService.getSleepData(ouraTokens, start, end);
 
     res.json(sleepData);
   } catch (error) {
@@ -153,8 +183,10 @@ router.get('/sleep', requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-router.get('/readiness', requireAuth, async (req: Request, res: Response) => {
+router.get('/readiness', async (req: Request, res: Response) => {
   try {
+    const { ouraTokens } = getTokensFromEnv();
+
     const { startDate, endDate } = req.query;
 
     if (!startDate || !endDate) {
@@ -168,12 +200,12 @@ router.get('/readiness', requireAuth, async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid date parameters' });
     }
 
-    if (!req.session.ouraTokens) {
+    if (!ouraTokens) {
       return res.json([]);
     }
 
     const readinessData = await ouraService.getReadinessData(
-      req.session.ouraTokens,
+      ouraTokens,
       start,
       end
     );
