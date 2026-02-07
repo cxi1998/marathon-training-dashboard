@@ -12,6 +12,7 @@ import './Dashboard.css';
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [lookback, setLookback] = useState(7);
@@ -34,14 +35,48 @@ export default function Dashboard() {
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // Clear the cache on the backend
+      await dashboardAPI.refreshCache();
+      // Fetch fresh data
+      await fetchData();
+    } catch (err: any) {
+      setError('Failed to refresh data');
+      console.error(err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <div className="dashboard">
-      <DateControls
-        endDate={endDate}
-        lookback={lookback}
-        onDateChange={setEndDate}
-        onLookbackChange={setLookback}
-      />
+      <div className="dashboard-header">
+        <DateControls
+          endDate={endDate}
+          lookback={lookback}
+          onDateChange={setEndDate}
+          onLookbackChange={setLookback}
+        />
+        <button
+          className={`refresh-button ${refreshing ? 'refreshing' : ''}`}
+          onClick={handleRefresh}
+          disabled={refreshing}
+          title="Refresh data from Strava and Oura"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+          </svg>
+        </button>
+      </div>
 
       {loading && <div className="loading-message">Loading data...</div>}
 

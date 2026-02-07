@@ -114,15 +114,35 @@ class OuraService {
       const accessToken = await this.ensureValidToken(tokens);
       const client = this.createClient(accessToken);
 
-      const response = await client.get<{ data: OuraSleep[] }>('/v2/usercollection/daily_sleep', {
+      // Fetch detailed sleep metrics (durations, efficiency, etc.)
+      const sleepResponse = await client.get<{ data: any[] }>('/v2/usercollection/sleep', {
         params: {
           start_date: startDate.toISOString().split('T')[0],
           end_date: endDate.toISOString().split('T')[0],
         },
       });
 
-      cache.set(cacheKey, response.data.data);
-      return response.data.data;
+      // Fetch daily sleep scores
+      const dailySleepResponse = await client.get<{ data: any[] }>('/v2/usercollection/daily_sleep', {
+        params: {
+          start_date: startDate.toISOString().split('T')[0],
+          end_date: endDate.toISOString().split('T')[0],
+        },
+      });
+
+      // Create a map of scores by date
+      const scoresMap = new Map(
+        dailySleepResponse.data.data.map(item => [item.day, item.score])
+      );
+
+      // Merge sleep data with scores
+      const mergedData = sleepResponse.data.data.map(sleepItem => ({
+        ...sleepItem,
+        score: scoresMap.get(sleepItem.day) || null,
+      }));
+
+      cache.set(cacheKey, mergedData);
+      return mergedData;
     } catch (error) {
       console.error('[Oura Service] Failed to fetch sleep data:', error);
       return [];

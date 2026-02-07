@@ -57,6 +57,11 @@ export const dashboardAPI = {
     });
     return response.data;
   },
+
+  refreshCache: async (): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.post('/api/dashboard/refresh');
+    return response.data;
+  },
 };
 
 export default apiClient;

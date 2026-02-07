@@ -1,4 +1,5 @@
 import type { SleepSummary } from '../types';
+import { formatNumber } from '../utils/formatNumber';
 import './DataTable.css';
 
 interface SleepTableProps {
@@ -31,12 +32,12 @@ export default function SleepTable({ sleepData }: SleepTableProps) {
               sleepData.map((sleep) => (
                 <tr key={sleep.id}>
                   <td>{sleep.date}</td>
-                  <td>{sleep.duration.toFixed(1)} hrs</td>
-                  <td>{sleep.deepSleep.toFixed(1)} hrs</td>
-                  <td>{sleep.lightSleep.toFixed(1)} hrs</td>
-                  <td>{sleep.remSleep.toFixed(1)} hrs</td>
-                  <td>{sleep.efficiency}%</td>
-                  <td className="score">{sleep.sleepScore}</td>
+                  <td>{formatNumber(sleep.duration)} hrs</td>
+                  <td>{formatNumber(sleep.deepSleep)} hrs</td>
+                  <td>{formatNumber(sleep.lightSleep)} hrs</td>
+                  <td>{formatNumber(sleep.remSleep)} hrs</td>
+                  <td>{formatNumber(sleep.efficiency)}%</td>
+                  <td className="score">{formatNumber(sleep.sleepScore)}</td>
                 </tr>
               ))
             )}

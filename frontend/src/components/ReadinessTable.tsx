@@ -1,4 +1,5 @@
 import type { ReadinessSummary } from '../types';
+import { formatNumber } from '../utils/formatNumber';
 import './DataTable.css';
 
 interface ReadinessTableProps {
@@ -30,11 +31,11 @@ export default function ReadinessTable({ readinessData }: ReadinessTableProps) {
               readinessData.map((readiness) => (
                 <tr key={readiness.id}>
                   <td>{readiness.date}</td>
-                  <td className="score">{readiness.readinessScore}</td>
-                  <td>{readiness.hrvBalance}</td>
-                  <td>{readiness.sleepBalance}</td>
-                  <td>{readiness.activityBalance}</td>
-                  <td>{readiness.restingHeartRate}</td>
+                  <td className="score">{formatNumber(readiness.readinessScore)}</td>
+                  <td>{formatNumber(readiness.hrvBalance)}</td>
+                  <td>{formatNumber(readiness.sleepBalance)}</td>
+                  <td>{formatNumber(readiness.activityBalance)}</td>
+                  <td>{formatNumber(readiness.restingHeartRate)}</td>
                 </tr>
               ))
             )}

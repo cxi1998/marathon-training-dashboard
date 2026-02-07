@@ -156,4 +156,37 @@ router.post('/logout', (req: Request, res: Response) => {
   });
 });
 
+// Debug endpoint to retrieve tokens after OAuth (for development only)
+router.get('/debug/tokens', (req: Request, res: Response) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(403).json({ error: 'Not available in production' });
+  }
+
+  const tokens = {
+    strava: req.session.stravaTokens || null,
+    oura: req.session.ouraTokens || null,
+  };
+
+  // If Oura tokens exist, format them for .env file
+  if (tokens.oura) {
+    const envFormat = `
+# Oura Access Token (add these to your .env file)
+OURA_ACCESS_TOKEN=${tokens.oura.accessToken}
+OURA_REFRESH_TOKEN=${tokens.oura.refreshToken}
+OURA_TOKEN_EXPIRES_AT=${Math.floor(tokens.oura.expiresAt / 1000)}
+    `.trim();
+
+    return res.json({
+      tokens,
+      envFormat,
+      instructions: 'Copy the envFormat values to your backend/.env file'
+    });
+  }
+
+  res.json({
+    tokens,
+    message: 'No tokens found in session. Complete OAuth flow first by visiting /api/auth/oura'
+  });
+});
+
 export default router;

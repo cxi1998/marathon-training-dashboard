@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import session from 'express-session';
 import authRoutes from './routes/auth';
 import dashboardRoutes from './routes/dashboard';
 
@@ -19,7 +20,19 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session middleware removed - tokens now come from environment variables
+// Session middleware (needed for OAuth flow to generate tokens)
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'temporary-secret-for-token-generation',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    },
+  })
+);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);

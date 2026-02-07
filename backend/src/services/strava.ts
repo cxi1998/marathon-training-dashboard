@@ -74,6 +74,13 @@ class StravaService {
     const after = Math.floor(startDate.getTime() / 1000);
     const before = Math.floor(endDate.getTime() / 1000);
 
+    console.log('[Strava] Fetching activities:', {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      after,
+      before,
+    });
+
     const activities: StravaActivity[] = [];
     let page = 1;
     const perPage = 200;
@@ -88,6 +95,8 @@ class StravaService {
         },
       });
 
+      console.log(`[Strava] Page ${page}: ${response.data.length} activities`);
+
       if (response.data.length === 0) break;
 
       activities.push(...response.data);
@@ -96,12 +105,16 @@ class StravaService {
       page++;
     }
 
+    console.log(`[Strava] Total activities fetched: ${activities.length}`);
+
     const runActivities = activities.filter(
       (activity) =>
         activity.type === 'Run' ||
         activity.sport_type === 'Run' ||
         activity.sport_type === 'TrailRun'
     );
+
+    console.log(`[Strava] Run activities after filter: ${runActivities.length}`);
 
     cache.set(cacheKey, runActivities);
     return runActivities;

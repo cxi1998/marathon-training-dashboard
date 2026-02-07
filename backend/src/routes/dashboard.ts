@@ -3,6 +3,7 @@ import stravaService from '../services/strava';
 import ouraService from '../services/oura';
 import { aggregateDashboardData } from '../utils/dataAggregation';
 import { TokenData } from '../types';
+import cache from '../services/cache';
 
 const router = Router();
 
@@ -44,7 +45,8 @@ router.get('/data', async (req: Request, res: Response) => {
 
     console.log(`[Dashboard Data] Tokens:`, {
       hasStrava: !!stravaTokens,
-      hasOura: !!ouraTokens
+      hasOura: !!ouraTokens,
+      stravaToken: stravaTokens?.accessToken?.substring(0, 10) + '...',
     });
 
     const { date, lookback } = req.query;
@@ -53,15 +55,20 @@ router.get('/data', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing date or lookback parameter' });
     }
 
-    const endDate = new Date(date as string);
+    let endDate = new Date(date as string);
     const lookbackDays = parseInt(lookback as string);
 
     if (isNaN(endDate.getTime()) || isNaN(lookbackDays)) {
       return res.status(400).json({ error: 'Invalid date or lookback parameter' });
     }
 
+    // Add 1 day to endDate to ensure we capture all activities on the end date
+    // (avoids timezone issues with end-of-day calculations)
+    endDate = new Date(endDate.getTime() + 24 * 60 * 60 * 1000);
+
     const startDate = new Date(endDate);
-    startDate.setDate(startDate.getDate() - lookbackDays + 1);
+    startDate.setDate(startDate.getDate() - lookbackDays);
+    startDate.setHours(0, 0, 0, 0);
 
     // Use Promise.allSettled to handle partial authentication
     const [activitiesResult, sleepDataResult, readinessDataResult] = await Promise.allSettled([
@@ -214,6 +221,18 @@ router.get('/readiness', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Readiness data error:', error);
     res.status(500).json({ error: 'Failed to fetch readiness data' });
+  }
+});
+
+router.post('/refresh', (req: Request, res: Response) => {
+  try {
+    // Clear all cached data
+    cache.flush();
+    console.log('[Dashboard] Cache cleared - fresh data will be fetched on next request');
+    res.json({ success: true, message: 'Cache cleared successfully' });
+  } catch (error) {
+    console.error('Cache refresh error:', error);
+    res.status(500).json({ error: 'Failed to refresh cache' });
   }
 });
 

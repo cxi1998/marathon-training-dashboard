@@ -1,4 +1,5 @@
 import type { DashboardData } from '../types';
+import { formatNumber } from '../utils/formatNumber';
 import './HeroKPIs.css';
 
 interface HeroKPIsProps {
@@ -23,17 +24,17 @@ export default function HeroKPIs({ kpis }: HeroKPIsProps) {
     <div className="hero-kpis">
       <div className="kpi-card">
         <div className="kpi-label">Weekly Mileage</div>
-        <div className="kpi-value">{weeklyMileage.toFixed(1)} mi</div>
+        <div className="kpi-value">{formatNumber(weeklyMileage)} mi</div>
         {weeklyMileageChange !== 0 && (
           <div className={`kpi-change ${weeklyMileageChange > 0 ? 'positive' : 'negative'}`}>
-            {weeklyMileageChange > 0 ? '▲' : '▼'} {Math.abs(weeklyMileageChange).toFixed(1)}%
+            {weeklyMileageChange > 0 ? '▲' : '▼'} {formatNumber(Math.abs(weeklyMileageChange))}%
           </div>
         )}
       </div>
 
       <div className="kpi-card">
         <div className="kpi-label">Avg Readiness</div>
-        <div className="kpi-value">{averageReadinessScore.toFixed(0)}</div>
+        <div className="kpi-value">{formatNumber(averageReadinessScore)}</div>
         <div className={`kpi-trend ${readinessTrend}`}>
           {readinessTrend === 'up' ? '▲' : readinessTrend === 'down' ? '▼' : '—'}
         </div>
@@ -41,8 +42,8 @@ export default function HeroKPIs({ kpis }: HeroKPIsProps) {
 
       <div className="kpi-card">
         <div className="kpi-label">Avg Sleep</div>
-        <div className="kpi-value">{averageSleepDuration.toFixed(1)} hrs</div>
-        <div className="kpi-subvalue">Score: {averageSleepScore.toFixed(0)}</div>
+        <div className="kpi-value">{formatNumber(averageSleepDuration)} hrs</div>
+        <div className="kpi-subvalue">Score: {formatNumber(averageSleepScore)}</div>
       </div>
 
       <div className="kpi-card">
@@ -52,12 +53,12 @@ export default function HeroKPIs({ kpis }: HeroKPIsProps) {
 
       <div className="kpi-card">
         <div className="kpi-label">Elevation Gain</div>
-        <div className="kpi-value">{cumulativeElevationGain.toFixed(0)} ft</div>
+        <div className="kpi-value">{formatNumber(cumulativeElevationGain)} ft</div>
       </div>
 
       <div className="kpi-card">
         <div className="kpi-label">Training Load</div>
-        <div className="kpi-value">{trainingLoad.toFixed(0)}</div>
+        <div className="kpi-value">{formatNumber(trainingLoad)}</div>
       </div>
     </div>
   );

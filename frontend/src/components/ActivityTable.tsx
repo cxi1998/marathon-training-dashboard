@@ -1,4 +1,5 @@
 import type { ActivitySummary } from '../types';
+import { formatNumber } from '../utils/formatNumber';
 import './DataTable.css';
 
 interface ActivityTableProps {
@@ -34,11 +35,11 @@ export default function ActivityTable({ activities }: ActivityTableProps) {
                   <td>{activity.date}</td>
                   <td className="activity-name">{activity.name}</td>
                   <td>{activity.type}</td>
-                  <td>{activity.distance.toFixed(2)} mi</td>
-                  <td>{activity.duration.toFixed(0)} min</td>
-                  <td>{activity.pace.toFixed(2)} min/mi</td>
-                  <td>{activity.elevationGain.toFixed(0)} ft</td>
-                  <td>{activity.averageHeartRate ? Math.round(activity.averageHeartRate) : '—'}</td>
+                  <td>{formatNumber(activity.distance)} mi</td>
+                  <td>{formatNumber(activity.duration)} min</td>
+                  <td>{formatNumber(activity.pace)} min/mi</td>
+                  <td>{formatNumber(activity.elevationGain)} ft</td>
+                  <td>{activity.averageHeartRate ? formatNumber(activity.averageHeartRate) : '—'}</td>
                 </tr>
               ))
             )}
