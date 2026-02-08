@@ -72,6 +72,11 @@ export function aggregateDashboardData(
   }));
 
   const totalMileage = activitySummaries.reduce((sum, act) => sum + act.distance, 0);
+
+  // Calculate average weekly mileage by dividing by number of weeks
+  const numberOfWeeks = lookbackDays / 7;
+  const weeklyMileage = totalMileage / numberOfWeeks;
+
   const avgReadiness =
     readinessSummaries.length > 0
       ? readinessSummaries.reduce((sum, r) => sum + (r.readinessScore ?? 0), 0) /
@@ -91,18 +96,23 @@ export function aggregateDashboardData(
     0
   );
 
-  const previousWeekStart = new Date(startDate);
-  previousWeekStart.setDate(previousWeekStart.getDate() - 7);
-  const previousWeekActivities = activities.filter((act) => {
+  // Calculate previous period's mileage (same length as current lookback period)
+  const previousPeriodStart = new Date(startDate);
+  previousPeriodStart.setDate(previousPeriodStart.getDate() - lookbackDays);
+  const previousPeriodActivities = activities.filter((act) => {
     const actDate = new Date(act.start_date_local);
-    return actDate >= previousWeekStart && actDate < startDate;
+    return actDate >= previousPeriodStart && actDate < startDate;
   });
-  const previousWeekMileage = previousWeekActivities.reduce(
+  const previousPeriodTotalMileage = previousPeriodActivities.reduce(
     (sum, act) => sum + metersToMiles(act.distance),
     0
   );
+  const previousPeriodWeeklyMileage = previousPeriodTotalMileage / numberOfWeeks;
+
   const weeklyMileageChange =
-    previousWeekMileage > 0 ? ((totalMileage - previousWeekMileage) / previousWeekMileage) * 100 : 0;
+    previousPeriodWeeklyMileage > 0
+      ? ((weeklyMileage - previousPeriodWeeklyMileage) / previousPeriodWeeklyMileage) * 100
+      : 0;
 
   const recentReadiness = readinessSummaries.slice(-3);
   const earlierReadiness = readinessSummaries.slice(0, -3);
@@ -163,7 +173,7 @@ export function aggregateDashboardData(
       lookbackDays,
     },
     kpis: {
-      weeklyMileage: totalMileage,
+      weeklyMileage,
       weeklyMileageChange,
       averageReadinessScore: avgReadiness,
       readinessTrend,
